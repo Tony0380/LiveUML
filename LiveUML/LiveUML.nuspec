@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>LiveUML</id>
+    <version>1.0.0</version>
+    <title>LiveUML - Dataverse UML Diagram Viewer</title>
+    <authors>Antonio Colamartino</authors>
+    <owners>Antonio Colamartino</owners>
+    <projectUrl>https://github.com/Tony0380/LiveUML</projectUrl>
+    <icon>icon_small.png</icon>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Visualize Dataverse entity metadata as live UML class diagrams</description>
+    <releaseNotes>Initial release</releaseNotes>
+    <copyright>Copyright Antonio Colamartino</copyright>
+    <tags>XrmToolBox Plugins UML Dataverse Metadata</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.8">
+        <dependency id="XrmToolBox" version="1.2025.10.74" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\net48\LiveUML.dll" target="lib\net48\Plugins" />
+    <file src="icon_small.png" target="" />
+  </files>
+</package>

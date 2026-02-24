@@ -1,0 +1,22 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.cache
+*.dll
+*.exe
+*.pdb
+
+## NuGet
+packages/
+*.nupkg
+
+## Visual Studio
+.vs/
+*.rsuser
+[Tt]humbs.db
+
+## JetBrains
+.idea/
