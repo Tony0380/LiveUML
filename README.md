@@ -1,7 +1,7 @@
 # LiveUML
 
 <p align="center">
-  <img src="Gemini_Generated_Image_grr0lugrr0lugrr0.png" alt="LiveUML Logo" width="200" />
+  <img src="logo.png" alt="LiveUML Logo" width="200" />
 </p>
 
 <p align="center">
