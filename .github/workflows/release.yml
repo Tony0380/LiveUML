@@ -25,9 +25,9 @@ jobs:
         run: dotnet pack LiveUML/LiveUML.csproj -c Release --no-build --output ./nupkg
 
       - name: Push to NuGet
-        run: dotnet nuget push ./nupkg/LiveUML.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push (Get-ChildItem ./nupkg/*.nupkg).FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
       - name: Create GitHub Release
-        run: gh release create ${{ github.ref_name }} ./nupkg/LiveUML.*.nupkg LiveUML/bin/Release/net48/LiveUML.dll --title "${{ github.ref_name }}" --generate-notes
+        run: gh release create ${{ github.ref_name }} (Get-ChildItem ./nupkg/*.nupkg).FullName LiveUML/bin/Release/net48/LiveUML.dll --title "${{ github.ref_name }}" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
