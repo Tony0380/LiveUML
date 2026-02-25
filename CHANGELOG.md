@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0] - 2025-02-25
+
+### Added
+- Zoom in/out on the diagram panel with Ctrl+MouseWheel (25%–300%)
+- Explicit horizontal and vertical scrollbars on the diagram panel
+- Mouse wheel scrolls the diagram vertically without Ctrl
+- Zoom level displayed in the status bar
+- Zoom resets to 100% on Clear All
+
+### Changed
+- Replaced AutoScroll with dedicated HScrollBar/VScrollBar controls for better visibility and control
+- Drag, resize, and click hit-testing now work correctly at any zoom level
+- Scrollbar ranges scale with zoom factor
+
 ## [1.1.0] - 2025-02-25
 
 ### Added

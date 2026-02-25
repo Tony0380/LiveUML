@@ -37,6 +37,8 @@ namespace LiveUML
             this.pnlRelationships = new System.Windows.Forms.Panel();
             this.lstRelationships = new System.Windows.Forms.CheckedListBox();
             this.lblRelationships = new System.Windows.Forms.Label();
+            this.vScrollBar = new System.Windows.Forms.VScrollBar();
+            this.hScrollBar = new System.Windows.Forms.HScrollBar();
             this.toolStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitLeft)).BeginInit();
             this.splitLeft.Panel1.SuspendLayout();
@@ -172,14 +174,29 @@ namespace LiveUML
             // splitRight.Panel1 - diagram
             //
             this.splitRight.Panel1.Controls.Add(this.diagramPanel);
+            this.splitRight.Panel1.Controls.Add(this.vScrollBar);
+            this.splitRight.Panel1.Controls.Add(this.hScrollBar);
             //
             // splitRight.Panel2 - detail
             //
             this.splitRight.Panel2.Controls.Add(this.tableDetail);
             //
+            // vScrollBar
+            //
+            this.vScrollBar.Dock = System.Windows.Forms.DockStyle.Right;
+            this.vScrollBar.Name = "vScrollBar";
+            this.vScrollBar.TabIndex = 1;
+            this.vScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.ScrollBar_Scroll);
+            //
+            // hScrollBar
+            //
+            this.hScrollBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.hScrollBar.Name = "hScrollBar";
+            this.hScrollBar.TabIndex = 2;
+            this.hScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.ScrollBar_Scroll);
+            //
             // diagramPanel
             //
-            this.diagramPanel.AutoScroll = true;
             this.diagramPanel.BackColor = System.Drawing.Color.White;
             this.diagramPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.diagramPanel.Location = new System.Drawing.Point(0, 0);
@@ -190,6 +207,8 @@ namespace LiveUML
             this.diagramPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DiagramPanel_MouseDown);
             this.diagramPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DiagramPanel_MouseMove);
             this.diagramPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DiagramPanel_MouseUp);
+            this.diagramPanel.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DiagramPanel_MouseWheel);
+            this.diagramPanel.Resize += new System.EventHandler(this.DiagramPanel_Resize);
             //
             // tableDetail
             //
@@ -313,6 +332,8 @@ namespace LiveUML
         private System.Windows.Forms.CheckedListBox lstEntities;
         private System.Windows.Forms.SplitContainer splitRight;
         private DoubleBufferedPanel diagramPanel;
+        private System.Windows.Forms.VScrollBar vScrollBar;
+        private System.Windows.Forms.HScrollBar hScrollBar;
         private System.Windows.Forms.TableLayoutPanel tableDetail;
         private System.Windows.Forms.Panel pnlAttributes;
         private System.Windows.Forms.Label lblAttributes;

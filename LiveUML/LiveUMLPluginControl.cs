@@ -45,6 +45,12 @@ namespace LiveUML
         private const int MinBoxWidth = 120;
         private const int MinBoxHeight = 66;
 
+        // Zoom state
+        private float _zoomLevel = 1.0f;
+        private const float ZoomMin = 0.25f;
+        private const float ZoomMax = 3.0f;
+        private const float ZoomStep = 0.1f;
+
         // Detail load queue
         private readonly Queue<EntityMetadataModel> _detailLoadQueue = new Queue<EntityMetadataModel>();
         private bool _isLoadingDetail;
@@ -119,9 +125,12 @@ namespace LiveUML
             _manualSizes.Clear();
             _currentLayout = null;
             _focusedEntity = null;
+            _zoomLevel = 1.0f;
             PopulateEntityList();
             ClearDetailPanels();
-            diagramPanel.AutoScrollMinSize = Size.Empty;
+            hScrollBar.Value = 0;
+            vScrollBar.Value = 0;
+            UpdateScrollBars();
             diagramPanel.Invalidate();
             lblStatus.Text = _allEntities.Count > 0 ? _allEntities.Count + " entities loaded" : "";
         }
@@ -475,11 +484,7 @@ namespace LiveUML
         private void RefreshDiagram()
         {
             _currentLayout = _diagramService.BuildLayout(_allEntities, _manualPositions, _manualSizes);
-
-            diagramPanel.AutoScrollMinSize = (_currentLayout != null && _currentLayout.TotalSize != Size.Empty)
-                ? _currentLayout.TotalSize
-                : Size.Empty;
-
+            UpdateScrollBars();
             diagramPanel.Invalidate();
             RefreshRelationshipCheckStates();
         }
@@ -501,12 +506,52 @@ namespace LiveUML
             _suppressCheckEvents = false;
         }
 
+        private void DiagramPanel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                ((HandledMouseEventArgs)e).Handled = true;
+
+                float oldZoom = _zoomLevel;
+                if (e.Delta > 0)
+                    _zoomLevel = Math.Min(ZoomMax, _zoomLevel + ZoomStep);
+                else
+                    _zoomLevel = Math.Max(ZoomMin, _zoomLevel - ZoomStep);
+
+                if (Math.Abs(_zoomLevel - oldZoom) < 0.001f) return;
+
+                UpdateScrollBars();
+                diagramPanel.Invalidate();
+                lblStatus.Text = (int)(_zoomLevel * 100) + "% zoom";
+            }
+            else
+            {
+                ((HandledMouseEventArgs)e).Handled = true;
+                int maxVal = Math.Max(0, vScrollBar.Maximum - vScrollBar.LargeChange + 1);
+                int delta = -(Math.Sign(e.Delta)) * vScrollBar.SmallChange * 3;
+                vScrollBar.Value = Math.Max(0, Math.Min(maxVal, vScrollBar.Value + delta));
+                diagramPanel.Invalidate();
+            }
+        }
+
+        private void ScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            diagramPanel.Invalidate();
+        }
+
+        private void DiagramPanel_Resize(object sender, EventArgs e)
+        {
+            UpdateScrollBars();
+            diagramPanel.Invalidate();
+        }
+
         private void DiagramPanel_Paint(object sender, PaintEventArgs e)
         {
             if (_currentLayout == null || _currentLayout.EntityBoxes.Count == 0)
                 return;
 
-            e.Graphics.TranslateTransform(diagramPanel.AutoScrollPosition.X, diagramPanel.AutoScrollPosition.Y);
+            e.Graphics.TranslateTransform(-hScrollBar.Value, -vScrollBar.Value);
+            e.Graphics.ScaleTransform(_zoomLevel, _zoomLevel);
             _renderer.Render(e.Graphics, _currentLayout);
         }
 
@@ -517,8 +562,8 @@ namespace LiveUML
         private Point ScreenToCanvas(Point screenPoint)
         {
             return new Point(
-                screenPoint.X - diagramPanel.AutoScrollPosition.X,
-                screenPoint.Y - diagramPanel.AutoScrollPosition.Y);
+                (int)((screenPoint.X + hScrollBar.Value) / _zoomLevel),
+                (int)((screenPoint.Y + vScrollBar.Value) / _zoomLevel));
         }
 
         private EntityBox HitTestBox(Point canvasPoint)
@@ -618,7 +663,7 @@ namespace LiveUML
             if (_isResizing && _resizeBox != null)
             {
                 _manualSizes[_resizeBox.EntityLogicalName] = _resizeBox.Bounds.Size;
-                UpdateScrollSize();
+                UpdateScrollBars();
                 _isResizing = false;
                 _resizeBox = null;
                 diagramPanel.Cursor = Cursors.Default;
@@ -631,7 +676,7 @@ namespace LiveUML
             if (_isDragging)
             {
                 _manualPositions[_dragBox.EntityLogicalName] = _dragBox.Bounds.Location;
-                UpdateScrollSize();
+                UpdateScrollBars();
                 _isDragging = false;
                 _dragBox = null;
                 diagramPanel.Cursor = Cursors.Default;
@@ -650,16 +695,39 @@ namespace LiveUML
             }
         }
 
-        private void UpdateScrollSize()
+        private void UpdateScrollBars()
         {
-            if (_currentLayout == null) return;
+            if (_currentLayout == null || _currentLayout.EntityBoxes.Count == 0)
+            {
+                hScrollBar.Maximum = 0;
+                vScrollBar.Maximum = 0;
+                return;
+            }
+
             int maxRight = 0, maxBottom = 0;
             foreach (var box in _currentLayout.EntityBoxes)
             {
                 if (box.Bounds.Right > maxRight) maxRight = box.Bounds.Right;
                 if (box.Bounds.Bottom > maxBottom) maxBottom = box.Bounds.Bottom;
             }
-            diagramPanel.AutoScrollMinSize = new Size(maxRight + 30, maxBottom + 30);
+
+            int canvasW = (int)((maxRight + 30) * _zoomLevel);
+            int canvasH = (int)((maxBottom + 30) * _zoomLevel);
+            int viewW = diagramPanel.ClientSize.Width;
+            int viewH = diagramPanel.ClientSize.Height;
+
+            hScrollBar.Maximum = Math.Max(0, canvasW);
+            hScrollBar.LargeChange = Math.Max(1, Math.Min(canvasW, viewW));
+            hScrollBar.SmallChange = 20;
+
+            vScrollBar.Maximum = Math.Max(0, canvasH);
+            vScrollBar.LargeChange = Math.Max(1, Math.Min(canvasH, viewH));
+            vScrollBar.SmallChange = 20;
+
+            int maxH = Math.Max(0, hScrollBar.Maximum - hScrollBar.LargeChange + 1);
+            int maxV = Math.Max(0, vScrollBar.Maximum - vScrollBar.LargeChange + 1);
+            if (hScrollBar.Value > maxH) hScrollBar.Value = maxH;
+            if (vScrollBar.Value > maxV) vScrollBar.Value = maxV;
         }
 
         #endregion
