@@ -26,6 +26,9 @@ LiveUML is an [XrmToolBox](https://www.xrmtoolbox.com) plugin that lets you expl
 - **Real-time UML rendering** — diagram updates live as you change selections
 - **Smart auto-layout** — BFS-based grid positioning places related entities near each other
 - **Drag-and-drop** — manually reposition entity boxes on the canvas
+- **Resizable boxes** — drag the bottom-right handle to resize entity boxes
+- **Zoom in/out** — Ctrl+MouseWheel to zoom from 25% to 300%
+- **Scrollable canvas** — horizontal and vertical scrollbars for navigating large diagrams
 - **Search and filter** — quickly find entities by logical or display name
 - **Export as PNG** — save the current diagram to an image file
 - **Fully async** — all Dataverse calls run in the background, no UI freezing

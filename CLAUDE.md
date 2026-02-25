@@ -22,6 +22,9 @@ XrmToolBox plugin that visualizes Dataverse entity metadata as live UML class di
 - Use XrmToolBox patterns: ExecuteMethod() for connection checks, WorkAsync() for background work
 - Use interfaces for services (IMetadataService, IDiagramService)
 
+## Post-Change Checklist
+After every modification, verify that `README.md` is still accurate (features list, screenshots description, usage instructions, etc.). If anything is outdated or missing, update it before committing.
+
 ## Post-Build Deploy
 After every successful build, manually copy the output DLL to the XrmToolBox Plugins folder:
 ```
@@ -62,6 +65,32 @@ Version must be updated in **two places** (must match):
 4. Annotated tag: `git tag -a v1.0.0 -m "Release 1.0.0: description"`
 5. Push: `git push origin master:main --tags`
 6. CI/CD handles the rest automatically (build, pack, NuGet push, GitHub Release)
+
+### Changelog Template
+File: `CHANGELOG.md` — prepend new version block at the top, keep previous entries below.
+
+```markdown
+## [X.Y.Z] - YYYY-MM-DD
+
+### Added
+- New feature or capability (one bullet per item)
+
+### Changed
+- Modifications to existing behavior
+
+### Fixed
+- Bug fixes
+
+### Removed
+- Removed features or deprecated items
+```
+
+Rules:
+- Use [Keep a Changelog](https://keepachangelog.com) format
+- Only include sections that have entries (omit empty sections)
+- Each bullet is a single concise sentence, no trailing period
+- Group related changes under the correct section
+- Update `releaseNotes` in `LiveUML.nuspec` with a one-line summary matching the commit message
 
 ### CI/CD Pipeline
 - **`.github/workflows/release.yml`** triggers on tag push (`v*`)
