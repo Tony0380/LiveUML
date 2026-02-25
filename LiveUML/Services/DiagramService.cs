@@ -10,7 +10,7 @@ namespace LiveUML.Services
     {
         private readonly LayoutEngine _layoutEngine = new LayoutEngine();
 
-        public DiagramLayout BuildLayout(List<EntityMetadataModel> allEntities, Dictionary<string, Point> manualPositions)
+        public DiagramLayout BuildLayout(List<EntityMetadataModel> allEntities, Dictionary<string, Point> manualPositions, Dictionary<string, Size> manualSizes)
         {
             var selectedEntities = allEntities
                 .Where(e => e.IsSelected)
@@ -51,7 +51,7 @@ namespace LiveUML.Services
                 })
                 .ToList();
 
-            return _layoutEngine.ComputeLayout(boxes, relationships, selectedEntities, manualPositions);
+            return _layoutEngine.ComputeLayout(boxes, relationships, selectedEntities, manualPositions, manualSizes);
         }
     }
 }

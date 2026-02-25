@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LiveUML</id>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <title>LiveUML - Dataverse UML Diagram Viewer</title>
     <authors>Antonio Colamartino</authors>
     <owners>Antonio Colamartino</owners>
@@ -10,7 +10,7 @@
     <icon>icon_small.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Visualize Dataverse entity metadata as live UML class diagrams</description>
-    <releaseNotes>Initial release</releaseNotes>
+    <releaseNotes>Add resizable entity boxes with drag handle and increase PNG export margin</releaseNotes>
     <copyright>Copyright Antonio Colamartino</copyright>
     <tags>XrmToolBox Plugins UML Dataverse Metadata</tags>
     <dependencies>

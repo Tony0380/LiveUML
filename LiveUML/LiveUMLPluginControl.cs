@@ -37,6 +37,14 @@ namespace LiveUML
         private Point _dragStartScreen;
         private bool _isDragging;
 
+        // Resize state
+        private readonly Dictionary<string, Size> _manualSizes = new Dictionary<string, Size>();
+        private bool _isResizing;
+        private EntityBox _resizeBox;
+        private const int ResizeHandleSize = 8;
+        private const int MinBoxWidth = 120;
+        private const int MinBoxHeight = 66;
+
         // Detail load queue
         private readonly Queue<EntityMetadataModel> _detailLoadQueue = new Queue<EntityMetadataModel>();
         private bool _isLoadingDetail;
@@ -82,6 +90,7 @@ namespace LiveUML
                     _allEntities = (List<EntityMetadataModel>)args.Result;
                     _filteredEntities = new List<EntityMetadataModel>(_allEntities);
                     _manualPositions.Clear();
+                    _manualSizes.Clear();
                     _currentLayout = null;
                     _focusedEntity = null;
                     txtSearch.Text = string.Empty;
@@ -107,6 +116,7 @@ namespace LiveUML
             }
 
             _manualPositions.Clear();
+            _manualSizes.Clear();
             _currentLayout = null;
             _focusedEntity = null;
             PopulateEntityList();
@@ -149,7 +159,7 @@ namespace LiveUML
                     if (box.Bounds.Bottom > maxY) maxY = box.Bounds.Bottom;
                 }
 
-                int margin = 20;
+                int margin = 40;
                 int width = maxX - minX + margin * 2;
                 int height = maxY - minY + margin * 2;
 
@@ -464,7 +474,7 @@ namespace LiveUML
 
         private void RefreshDiagram()
         {
-            _currentLayout = _diagramService.BuildLayout(_allEntities, _manualPositions);
+            _currentLayout = _diagramService.BuildLayout(_allEntities, _manualPositions, _manualSizes);
 
             diagramPanel.AutoScrollMinSize = (_currentLayout != null && _currentLayout.TotalSize != Size.Empty)
                 ? _currentLayout.TotalSize
@@ -523,6 +533,16 @@ namespace LiveUML
             return null;
         }
 
+        private bool HitTestResizeHandle(EntityBox box, Point canvasPoint)
+        {
+            var handleRect = new Rectangle(
+                box.Bounds.Right - ResizeHandleSize,
+                box.Bounds.Bottom - ResizeHandleSize,
+                ResizeHandleSize,
+                ResizeHandleSize);
+            return handleRect.Contains(canvasPoint);
+        }
+
         private void DiagramPanel_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || _currentLayout == null) return;
@@ -530,6 +550,13 @@ namespace LiveUML
             var canvasPoint = ScreenToCanvas(e.Location);
             var box = HitTestBox(canvasPoint);
             if (box == null) return;
+
+            if (HitTestResizeHandle(box, canvasPoint))
+            {
+                _isResizing = true;
+                _resizeBox = box;
+                return;
+            }
 
             _dragBox = box;
             _dragOffset = new Point(canvasPoint.X - box.Bounds.X, canvasPoint.Y - box.Bounds.Y);
@@ -539,6 +566,19 @@ namespace LiveUML
 
         private void DiagramPanel_MouseMove(object sender, MouseEventArgs e)
         {
+            if (_isResizing && _resizeBox != null)
+            {
+                var canvasPoint = ScreenToCanvas(e.Location);
+                int newWidth = Math.Max(MinBoxWidth, canvasPoint.X - _resizeBox.Bounds.X);
+                int newHeight = Math.Max(MinBoxHeight, canvasPoint.Y - _resizeBox.Bounds.Y);
+
+                _resizeBox.Bounds = new Rectangle(_resizeBox.Bounds.X, _resizeBox.Bounds.Y, newWidth, newHeight);
+                Rendering.LayoutEngine.RecomputeLines(_currentLayout);
+                diagramPanel.Invalidate();
+                diagramPanel.Cursor = Cursors.SizeNWSE;
+                return;
+            }
+
             if (_dragBox != null && !_isDragging)
             {
                 int dx = e.X - _dragStartScreen.X;
@@ -563,12 +603,29 @@ namespace LiveUML
             if (_currentLayout != null && _dragBox == null)
             {
                 var canvasPoint = ScreenToCanvas(e.Location);
-                diagramPanel.Cursor = HitTestBox(canvasPoint) != null ? Cursors.Hand : Cursors.Default;
+                var box = HitTestBox(canvasPoint);
+                if (box != null && HitTestResizeHandle(box, canvasPoint))
+                    diagramPanel.Cursor = Cursors.SizeNWSE;
+                else if (box != null)
+                    diagramPanel.Cursor = Cursors.Hand;
+                else
+                    diagramPanel.Cursor = Cursors.Default;
             }
         }
 
         private void DiagramPanel_MouseUp(object sender, MouseEventArgs e)
         {
+            if (_isResizing && _resizeBox != null)
+            {
+                _manualSizes[_resizeBox.EntityLogicalName] = _resizeBox.Bounds.Size;
+                UpdateScrollSize();
+                _isResizing = false;
+                _resizeBox = null;
+                diagramPanel.Cursor = Cursors.Default;
+                diagramPanel.Invalidate();
+                return;
+            }
+
             if (_dragBox == null) return;
 
             if (_isDragging)

@@ -45,15 +45,26 @@ Format: `MAJOR.MINOR.PATCH` (e.g. `1.0.0`)
 - **MINOR** (1.x.0): new features (new export types, layout algorithms, etc.)
 - **MAJOR** (x.0.0): breaking changes, architectural rewrites
 
-Version is set in one place: `LiveUML.csproj` (`AssemblyVersion` + `FileVersion`).
+Version must be updated in **two places** (must match):
+- `LiveUML.csproj`: `<Version>`, `<AssemblyVersion>`, `<FileVersion>`
+- `LiveUML.nuspec`: `<version>`
+
+`Version` is 3-part (e.g. `1.0.0`), `AssemblyVersion`/`FileVersion` are 4-part (e.g. `1.0.0.0`).
 
 ### Tags
 - Format: `v{MAJOR}.{MINOR}.{PATCH}` (e.g. `v1.0.0`)
 - Always use annotated tags: `git tag -a v1.0.0 -m "description"`
 
 ### Release Process
-1. Update version in `LiveUML.csproj` (AssemblyVersion + FileVersion)
-2. Commit: `"Release v1.0.0: short description"`
-3. Annotated tag: `git tag -a v1.0.0 -m "Release 1.0.0: description"`
-4. Push: `git push origin main --tags`
-5. GitHub Release: `gh release create v1.0.0 --title "v1.0.0" --notes "..." LiveUML/bin/Debug/net48/LiveUML.dll`
+1. Update version in `LiveUML.csproj` (`Version` + `AssemblyVersion` + `FileVersion`)
+2. Update version in `LiveUML.nuspec` (`<version>`)
+3. Commit: `"Release v1.0.0: short description"`
+4. Annotated tag: `git tag -a v1.0.0 -m "Release 1.0.0: description"`
+5. Push: `git push origin master:main --tags`
+6. CI/CD handles the rest automatically (build, pack, NuGet push, GitHub Release)
+
+### CI/CD Pipeline
+- **`.github/workflows/release.yml`** triggers on tag push (`v*`)
+- Builds Release, packs `.nupkg`, pushes to nuget.org, creates GitHub Release
+- NuGet API key stored as repo secret `NUGET_API_KEY`
+- XrmToolBox Tool Library picks up updates from nuget.org automatically

@@ -6,6 +6,6 @@ namespace LiveUML.Services
 {
     public interface IDiagramService
     {
-        DiagramLayout BuildLayout(List<EntityMetadataModel> allEntities, Dictionary<string, Point> manualPositions);
+        DiagramLayout BuildLayout(List<EntityMetadataModel> allEntities, Dictionary<string, Point> manualPositions, Dictionary<string, Size> manualSizes);
     }
 }

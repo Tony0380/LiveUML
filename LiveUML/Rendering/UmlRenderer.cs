@@ -77,6 +77,18 @@ namespace LiveUML.Rendering
                     g.DrawString("(no attributes selected)", AttributeFont, grayBrush, bounds.X + TextPadding, y);
                 }
             }
+
+            // Draw resize grip at bottom-right corner
+            using (var gripPen = new Pen(Color.FromArgb(160, 160, 160), 1f))
+            {
+                int rx = bounds.Right - 3;
+                int ry = bounds.Bottom - 3;
+                for (int i = 0; i < 3; i++)
+                {
+                    int offset = i * 3;
+                    g.DrawLine(gripPen, rx - offset, ry, rx, ry - offset);
+                }
+            }
         }
 
         private void DrawRelationshipLine(Graphics g, RelationshipLine line)

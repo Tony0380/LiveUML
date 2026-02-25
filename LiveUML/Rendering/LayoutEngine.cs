@@ -20,7 +20,8 @@ namespace LiveUML.Rendering
             List<EntityBox> boxes,
             List<RelationshipMetadataModel> selectedRelationships,
             List<EntityMetadataModel> selectedEntities,
-            Dictionary<string, Point> manualPositions)
+            Dictionary<string, Point> manualPositions,
+            Dictionary<string, Size> manualSizes)
         {
             if (boxes.Count == 0)
                 return new DiagramLayout { TotalSize = Size.Empty };
@@ -44,10 +45,23 @@ namespace LiveUML.Rendering
             // BFS order starting from most-connected entity
             var bfsOrder = ComputeBfsOrder(n, adj);
 
-            // Compute all box heights upfront
+            // Compute all box sizes upfront (use manual sizes when available)
+            var boxWidths = new int[n];
             var boxHeights = new int[n];
             for (int i = 0; i < n; i++)
-                boxHeights[i] = ComputeBoxHeight(boxes[i]);
+            {
+                Size manualSize;
+                if (manualSizes != null && manualSizes.TryGetValue(boxes[i].EntityLogicalName, out manualSize))
+                {
+                    boxWidths[i] = manualSize.Width;
+                    boxHeights[i] = manualSize.Height;
+                }
+                else
+                {
+                    boxWidths[i] = BoxWidth;
+                    boxHeights[i] = ComputeBoxHeight(boxes[i]);
+                }
+            }
 
             // Phase 1: place manually positioned boxes
             var placed = new bool[n];
@@ -58,7 +72,7 @@ namespace LiveUML.Rendering
                     Point manualPos;
                     if (manualPositions.TryGetValue(boxes[i].EntityLogicalName, out manualPos))
                     {
-                        boxes[i].Bounds = new Rectangle(manualPos.X, manualPos.Y, BoxWidth, boxHeights[i]);
+                        boxes[i].Bounds = new Rectangle(manualPos.X, manualPos.Y, boxWidths[i], boxHeights[i]);
                         placed[i] = true;
                     }
                 }
@@ -79,7 +93,7 @@ namespace LiveUML.Rendering
                 int x = BasePadding + targetCol * (BoxWidth + columnGap);
                 int y = columnHeights[targetCol];
 
-                boxes[idx].Bounds = new Rectangle(x, y, BoxWidth, boxHeights[idx]);
+                boxes[idx].Bounds = new Rectangle(x, y, boxWidths[idx], boxHeights[idx]);
                 columnHeights[targetCol] = y + boxHeights[idx] + rowGap;
                 placedCol[idx] = targetCol;
                 placed[idx] = true;
